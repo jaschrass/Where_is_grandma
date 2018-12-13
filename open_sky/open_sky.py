@@ -11,7 +11,7 @@ import pandas as pd
 
 def find_icaos(aircraft):
     '''
-    Finds the icao24 ids of a desired aircraft type using the data from the
+    Finds the icao24 id #s of a desired aircraft type using the data from the
     current downloaded version of aircraftDatabase.csv. Requires an aircraft
     input as a string.
     Examples: 'A380', '737', '787'
@@ -40,30 +40,60 @@ def find_icaos(aircraft):
     return icao_num
 
 
-def get_data(time, desired_icaos):
+def get_data(desired_icaos):
     api = OpenSkyApi()
     # bbox=(latmin,latmax,lonmin,lonmax) - selecting area over united states
     # time_secs=0 - time as unix time stamp or datetime in UTC
     # icao24=None - retrive state vectors for given ICAO24 addresses
     #   (input array of strings)
-    for i in range(len(time)):
-        states = api.get_states(time_secs=time[i], icao24=desired_icaos,
-                                bbox=(13, 58, -144, -53))
-        lat = []
-        lon = []
-        icao = []
-        vel = []
-        alt = []
-        for s in states.states:
-            '''
-            print("(%r, %r, %r, %r, %r)" % (s.longitude, s.latitude,
-                                            s.baro_altitude,
-                                            s.velocity, s.icao24))
-            '''
-            lon.append(s.longitude)
-            lat.append(s.latitude)
-            icao.append(s.icao24)
-            vel.append(s.velocity)
-            alt.append(s.geo_altitude)
+
+    # FIXME - set time_secs and icao24 arguments once a passowrd is obtained to
+    # run at set times (for example the time when the aircraftDatabase was last
+    # updated)
+    states = api.get_states(
+                            bbox=(13, 58, -144, -53))
+    lat = []
+    lon = []
+    icao = []
+    vel = []
+    alt = []
+    # print(states)
+    for s in states.states:
+        '''
+        print("(%r, %r, %r, %r, %r)" % (s.longitude, s.latitude,
+                                        s.baro_altitude,
+                                        s.velocity, s.icao24))
+        '''
+        lon.append(s.longitude)
+        lat.append(s.latitude)
+        icao.append(s.icao24)
+        vel.append(s.velocity)
+        alt.append(s.geo_altitude)
 
     return lon, lat, icao, vel, alt
+
+
+'''
+# while loop to run for a period of time
+i = 0
+while i < 6:  # runs for 6 * 15 seconds
+    desired_icaos = find_icaos('A380')
+    [lat, lon, icao, vel, alt] = get_data(desired_icaos)
+    sleep(15)  # wait for 15 seconds between runs
+    i += 1
+'''
+
+# gets a list of icao numbers for the input aircraft type
+desired_icaos = find_icaos('A380')
+# print(desired_icaos)
+
+# uses the api to output data for the desired icaos
+[lat, lon, icao, vel, alt] = get_data(desired_icaos)
+# print(lat, lon)
+
+# Plotting Velocity Distribution
+plt.hist(vel, 200)
+plt.xlabel('Velocity (m/s)')
+plt.ylabel('Number of Aircraft')
+plt.title('Velocity Distribution of Aircraft over the US')
+plt.show()
