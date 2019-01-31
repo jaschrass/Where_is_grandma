@@ -18,7 +18,7 @@ def find_icaos(aircraft):
     '''
     # be as specific or as general as desired with the aircraft name
     fields = ['icao24', 'model']
-    aircraft_data = pd.read_csv("aircraftDatabase.csv", na_filter=False,
+    aircraft_data = pd.read_csv("aircraft_data/aircraftDatabase.csv", na_filter=False,
                                 usecols=fields)
 
     model_names = aircraft_data['model']
